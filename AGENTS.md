@@ -35,7 +35,10 @@ uv run uvicorn api.index:app --port 8377       # локальная провер
 
 - Проект linked (`.vercel/project.json`): `ruudc-mcp`, team `acme-f271`
   (`team_y9rKmS0v8AforZ5xnifkdcg7`), projectId `prj_7njzPSCe7KcEeQ0ZLUVWecA3O8Ap`.
-- Деплой: `vercel deploy --prod --yes --token "$VERCEL_TOKEN"` (~30 c, заливает 29 МБ данных).
+- **Git-интеграция включена** (`vercel git connect`): каждый push в `main` автоматически
+  деплоит прод (прод-ветка — `main`). CLI-деплой тоже работает:
+  `vercel deploy --prod --yes --token "$VERCEL_TOKEN"` (~30 c, заливает 29 МБ данных).
+  Push без деплоя — `[skip deploy]`/`[vercel skip]` в конце сообщения коммита.
 - Прод-endpoint: `https://ruudc-mcp.vercel.app/mcp` (публичный, read-only).
 - Живость проверять **POST**-ом (initialize, `Accept: application/json, text/event-stream`).
   GET почти ничего не говорит: после rewrite это SSE-пинг, а внешние фетчеры с
