@@ -2,7 +2,11 @@
 __pycache__/
 *.pyc
 data/teacode_scrape_errors.txt
+data/triumph_scrape_errors.txt
+data/teacode_udc.json
+data/triumph_udc.json
 data_teacode_crawl.log
+data_triumph_crawl.log
 .vercel
 .env*
 .zcode/

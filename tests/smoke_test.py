@@ -38,7 +38,9 @@ async def main() -> None:
             r = await s.call_tool("udc_sources", {})
             data = json.loads(r.content[0].text)
             names = {x["name"] for x in data["sources"]}
-            check("udc_sources видит оба источника", names == {"teacode", "summary"}, str(names))
+            check("udc_sources видит все три источника", names == {"teacode", "summary", "triumph"}, str(names))
+            first = data["sources"][0]
+            check("triumph — основной (первый, primary=true)", first["name"] == "triumph" and first.get("primary") is True, str(first)[:80])
             check("в источниках есть коды", data["total_codes"] > 1000, str(data["total_codes"]))
 
             # search by code prefix
@@ -58,7 +60,8 @@ async def main() -> None:
             data = json.loads(r.content[0].text)
             check("udc_get 004.9 ok", data.get("ok") is True)
             srcs = {e["source"] for e in data.get("entries", [])}
-            check("004.9 есть в обоих источниках", srcs == {"teacode", "summary"}, str(srcs))
+            check("004.9 есть во всех источниках", srcs == {"teacode", "summary", "triumph"}, str(srcs))
+            check("первая карточка — от triumph (основной)", data["entries"][0]["source"] == "triumph", data["entries"][0]["source"])
             e = next(e for e in data["entries"] if e["source"] == "teacode")
             anc = [a["code"] for a in e["ancestors"]]
             check("предки 004.9 доходят до корня", anc and anc[0] in ("0", "00"), str(anc))

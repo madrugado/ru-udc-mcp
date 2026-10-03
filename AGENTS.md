@@ -8,16 +8,27 @@
 - `server.py` — сам MCP-сервер: `MCPServer` из **mcp 2.x**, транспорт stdio.
   Инструменты: `udc_sources`, `udc_search`, `udc_get`, `udc_children`, `udc_suggest`.
   Данные — из `DATA_DIR` (env `UDC_DATA_DIR` либо `./data` относительно server.py).
+- `udctext.py` — нормализация/стеммер/токены/ключ шарда; общий для server.py и
+  build_shards (vocab должен строиться той же токенизацией, что ищет рантайм).
 - `api/index.py` — обёртка того же сервера в Streamable HTTP для Vercel:
   stateless + `json_response`, строит сессию поверх приватного
   `server.mcp._lowlevel_server`, отключает DNS-rebinding-защиту, задаёт
   `UDC_DATA_DIR`, добавляет корень репо в `sys.path`.
-- `data/*.json` — снимки источников, в git включены (27 МБ + 466 КБ):
-  `teacode_udc.json` (126k+ кодов, издание ~2015, местами устарел) и
-  `udcsummary_ru.json` (официальный UDC Summary, ~2 700 кодов — по нему сверять
-  актуальность; `udc_get` сам предупреждает о расхождениях источников).
-- `scripts/scrape_teacode.py` (~10–15 мин), `scripts/scrape_udcsummary.py` (~15 с) —
-  обновление снимков (stdlib only). После обновления — коммит данных + деплой.
+- Три источника, ~237k кодов, **основной — `triumph`** (первым во всех ответах,
+  приоритетен в suggest при дедупе одинаковых кодов): `triumph` (112k, «УДК 2026»
+  изд. Триумф — современная редакция), `summary` (официальный UDC Summary, ~2.7k —
+  по нему сверять актуальность; только в нём вспомогательные таблицы
+  определителей), `teacode` (121k, издание ~2015, местами устарел — разделы
+  2 «Религия», 60, 79). `udc_get` сам предупреждает о расхождениях источников.
+- `data/shards/<источник>/{meta,vocab}.json + shards/<XX>.json` — **ленивые шарды**
+  (в git включены именно они): при старте читаются только meta+vocab (~0.5 с),
+  шарды грузятся по запросу. Большие монолиты (`teacode_udc.json`,
+  `triumph_udc.json`, git-ignored) — канонические снимки; `udcsummary_ru.json`
+  (466 КБ) в git тоже, он маленький.
+- `scripts/scrape_teacode.py` (~10–15 мин), `scripts/scrape_udcsummary.py` (~15 с),
+  `scripts/scrape_triumph.py` (~1.5–2 ч, 113k страниц), `scripts/build_shards.py`
+  (~20 с) — обновление данных (все stdlib only). Порядок: скрейп → `build_shards`
+  → коммит шардов → деплой.
 - `vercel.json` — деплой; `requirements.txt` — не используется платформой (см. грабли).
 - `tests/smoke_test.py` — e2e всех инструментов по stdio.
 - Токен Vercel: `VERCEL_TOKEN` в `~/.zshenv` (не в репо; значение нигде не дублировать).
@@ -29,6 +40,7 @@ uv sync                                        # восстановить .venv 
 uv run python tests/smoke_test.py              # быстрый критерий: e2e по stdio
 uv run uvicorn api.index:app --port 8377       # локальная проверка HTTP-обёртки
 # затем POST http://127.0.0.1:8377/mcp с JSON-RPC initialize / tools/call
+python3 scripts/build_shards.py                # перегенерация шардов после скрейпа
 ```
 
 ## Деплой и проверки на проде
@@ -76,12 +88,17 @@ uv run uvicorn api.index:app --port 8377       # локальная провер
 8. API рассчитан на **mcp 2.x** (`mcp.server.mcpserver.MCPServer`,
    `streamable_http_app`, приватный `_lowlevel_server`). При апгрейде mcp —
    перепроверить `api/index.py` и локально, и на проде.
-9. Холодный старт 10–25 с — это парсинг 27 МБ JSON при импорте. Если станет проблемой:
-   уменьшать/выносить датасет, а не бороться с платформой.
+9. Холодный старт 10–25 с (парсинг 27 МБ JSON при импорте) **закрыт шардированной
+   ленивой загрузкой**: при старте читаются только meta.json+vocab.json (<1 с),
+   шарды грузятся по запросу. Если снова возникнет — проверь, что `data/shards/`
+   собран (`python3 scripts/build_shards.py`) и попал в деплой (glob `data/**`
+   в `vercel.json` покрывает его).
 
 ## Git
 
 - Remote: `git@github.com:madrugado/ru-udc-mcp.git`, ветка `main`.
 - В репо не попадают: `.venv/`, `.vercel/`, `.env*`, `.zcode/` (локальный конфиг
-  с машинными путями), `__pycache__/`, логи краулеров. Токенов в репо нет —
+  с машинными путями), `__pycache__/`, логи краулеров, большие монолитные снимки
+  `data/teacode_udc.json` / `data/triumph_udc.json` (каноника воспроизводима
+  краулерами; в git — шарды). Токенов в репо нет —
   перед пушем новых файлов со строками подключения быстро проверять grep-ом.
