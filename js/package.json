@@ -1,0 +1,22 @@
+{
+  "name": "ruudc-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for UDC (УДК) classifiers: search, hierarchy and suggest over triumph (УДК 2026), official UDC Summary and teacode. Runs locally over stdio; data is loaded lazily from static hosting (or a local data dir).",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "ruudc-mcp": "index.js"
+  },
+  "files": [
+    "index.js",
+    "lib.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "zod": "^3.25.0"
+  }
+}

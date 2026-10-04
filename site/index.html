@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>УДК — поиск по классификатору</title>
+<meta name="description" content="Поиск кодов УДК: современная редакция 2026, официальный UDC Summary и детальное старое издание. Работает в браузере, индексы грузятся лениво.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>УДК <span class="thin">· поиск по классификатору</span></h1>
+  <div id="sources"></div>
+</header>
+
+<main>
+  <div id="mode">
+    <button data-mode="search" class="active">Поиск</button>
+    <button data-mode="suggest">Коды по теме</button>
+  </div>
+  <div id="searchrow">
+    <input id="q" type="search" autocomplete="off" spellcheck="false"
+           placeholder="тема или код: «нейронные сети», «621.37», «gis»…">
+  </div>
+  <div id="loading" hidden><span class="spinner"></span> <span class="what"></span></div>
+  <nav id="rootSections" hidden></nav>
+  <section id="results"></section>
+</main>
+
+<footer>
+  <span id="status"></span>
+  <span class="sep">·</span>
+  данные: «УДК 2026» (Триумф), UDC Summary (UDC Consortium, CC BY-NC-ND), teacode.com
+  <span class="sep">·</span>
+  <a href="https://ruudc-mcp.vercel.app/mcp">MCP-сервер для ИИ-ассистентов</a>
+</footer>
+
+<div id="detail" hidden>
+  <div id="detail-panel">
+    <header>
+      <h3 id="detail-title"></h3>
+      <button id="detail-close" title="закрыть">✕</button>
+    </header>
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -12,12 +12,13 @@ _ROOT = _HERE.parent  # корень проекта
 
 
 def _find_data_dir() -> Path:
+    # в бандл попадают только git-tracked файлы: шарды (data/shards/**) и свод
+    # udcsummary_ru.json; монолиты teacode/triumph — gitignored, на них не полагаемся
     for candidate in (_ROOT / "data", _HERE / "data", Path.cwd() / "data"):
-        if (candidate / "teacode_udc.json").is_file():
+        if (candidate / "shards").is_dir() or (candidate / "udcsummary_ru.json").is_file():
             return candidate
     raise RuntimeError(
-        "UDC data files not found in the function bundle; "
-        "check includeFiles in vercel.json"
+        "UDC data files not found in the bundle; expected data/shards/ in the deploy"
     )
 
 

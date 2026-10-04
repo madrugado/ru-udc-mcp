@@ -1,6 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
+node_modules/
 data/teacode_scrape_errors.txt
 data/triumph_scrape_errors.txt
 data/teacode_udc.json
@@ -10,3 +11,5 @@ data_triumph_crawl.log
 .vercel
 .env*
 .zcode/
+site/data/
+.tatnet/
